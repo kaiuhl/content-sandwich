@@ -37,9 +37,13 @@ class ContentSandwich.StateMachine
     _.each @states, (state) =>
       @listeners state
 
+    # default transitions
+    @transition_in = ($elem) -> $elem.show()
+    @transition_out = ($elem) -> $elem.hide()
+
     # try to deserialize, otherwise transition to the default state
     @deserialize()
-    @transition(@states[0]) if @states[0] and not @currentState
+    @transition(@states[0]) if @states[0] and not @current_state
 
   # keep all binding up to date
   global_listeners: ->
@@ -47,6 +51,10 @@ class ContentSandwich.StateMachine
 
   # transition states on click
   listeners: (stateName) ->
+    # turn off existing listeners
+    $(document).off "click", "[data-state-transition='#{stateName}']"
+
+    # apply
     $(document).on "click", "[data-state-transition='#{stateName}']", (e) =>
       e.preventDefault()
       @transition($(e.currentTarget).attr("data-state-transition"))
@@ -54,29 +62,28 @@ class ContentSandwich.StateMachine
 
   # hide inactive states, show active state
   transition: (stateName) ->
-    console.log "Transitioning to #{stateName}"
     throw "Undefined state `#{stateName}`" unless stateName in @states
-    if @functions[stateName]?() isnt false
-      $("[data-state-group='#{@group}'][data-state='#{stateName}']").show()
-      $("[data-state-group='#{@group}'][data-state!='#{stateName}']").hide()
+
+    #if the state exits, transition to it
+    if @functions[stateName]?() isnt false and stateName isnt @current_state
+      @transition_in $("[data-state-group='#{@group}'][data-state='#{stateName}']")
+      @transition_out $("[data-state-group='#{@group}'][data-state!='#{stateName}']")
       _.each @states, (state) ->
         $("[data-state-transition='#{state}']").toggleClass('active_tab', state is stateName)
-      @currentState = stateName
+      @current_state = stateName
       $(document).trigger("transition:#{@group}")
     else # cancelled transition
       $(document).trigger("transition:cancel:#{@group}")
-      @functions[@currentState]?()
+      @functions[@current_state]?()
     @serialize()
 
   # accepts function that's called on transition
-  on: (stateName, func) ->
-    @functions[stateName] = func
-
+  on: (stateName, func) -> @functions[stateName] = func
   off: (stateName) -> @functions[stateName] = null
 
   # url update
   serialize: ->
-    ContentSandwich.state[@group] = @currentState if @currentState
+    ContentSandwich.state[@group] = @current_state if @current_state
     if history.replaceState
       state = _.map(ContentSandwich.state, (state, group) -> "#{group}/#{state}").join('//')
       history.replaceState?({}, document.title, "#{location.pathname}##{state}")
@@ -87,4 +94,5 @@ class ContentSandwich.StateMachine
       _.each states, (pair) =>
         [group, state] = pair.split('/')
         @transition(state) if group is @group
+
 
