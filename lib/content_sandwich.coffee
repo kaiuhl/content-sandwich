@@ -25,17 +25,17 @@ $ ->
 class ContentSandwich.StateMachine
   constructor: (@group) ->
     @functions = {}
+    @events = "click"
     @global_listeners()
     @init()
 
   init: ->
     # get array of possible states
-    @states = _.map $("[data-state-group='#{@group}']"), (state) ->
-      $(state).attr("data-state")
+    @states = $("[data-state][data-state-group='#{@group}']").map (i, state) -> $(state).attr("data-state")
 
     # add listeners for each state
-    _.each @states, (state) =>
-      @listeners state
+    @iterative_listeners()
+    _.each @states, (state) => @state_listeners state
 
     # default transitions
     @transition_in = ($elem) -> $elem.show()
@@ -49,13 +49,34 @@ class ContentSandwich.StateMachine
   global_listeners: ->
     $(document).on "ajax:complete ajaxComplete", => @init()
 
+  # next & previous listeners
+  iterative_listeners: ->
+    # next listeners
+    jQuery(document).on @events, "[data-state-transition-next='#{@group}']", (e) =>
+      index = _.indexOf(@states, @current_state)
+      length = @states.length
+      e.preventDefault()
+      if index isnt (length - 1)
+        @transition(@states[index + 1])
+      else
+        @transition(@states[0])
+
+    # previous listeners
+    jQuery(document).on @events, "[data-state-transition-previous='#{@group}']", (e) =>
+      index = _.indexOf(@states, @current_state)
+      length = @states.length
+      e.preventDefault()
+      if index isnt 0
+        @transition(@states[index - 1])
+      else
+        @transition(@states[length - 1])
   # transition states on click
-  listeners: (stateName) ->
+  state_listeners: (stateName) ->
     # turn off existing listeners
-    $(document).off "click", "[data-state-transition='#{stateName}']"
+    $(document).off "click", "[data-state-group='#{@group}'][data-state-transition='#{stateName}']"
 
     # apply
-    $(document).on "click", "[data-state-transition='#{stateName}']", (e) =>
+    $(document).on "click", "[data-state-group='#{@group}'][data-state-transition='#{stateName}']", (e) =>
       e.preventDefault()
       @transition($(e.currentTarget).attr("data-state-transition"))
       $(document).trigger("transition:#{stateName}")
@@ -67,7 +88,7 @@ class ContentSandwich.StateMachine
     #if the state exits, transition to it
     if @functions[stateName]?() isnt false and stateName isnt @current_state
       @transition_in $("[data-state-group='#{@group}'][data-state='#{stateName}']")
-      @transition_out $("[data-state-group='#{@group}'][data-state!='#{stateName}']")
+      @transition_out $("[data-state-group='#{@group}'][data-state][data-state!='#{stateName}']")
       _.each @states, (state) ->
         $("[data-state-transition='#{state}']").toggleClass('active_tab', state is stateName)
       @current_state = stateName

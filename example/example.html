@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="example.css" title="main" type="text/css" />
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		<script src="https://raw.github.com/documentcloud/underscore/master/underscore-min.js"></script>
+		<script src="../lib/content_sandwich.js"></script>
+	</head>
+	<body>
+
+		<div data-state="top_bread" data-state-group="sandwich"> Top Slice of Bread </div>
+		<div data-state="lettuce" data-state-group="sandwich"> Lettuce </div>
+		<div data-state="meat" data-state-group="sandwich"> Meat </div>
+		<div data-state="mayonnaise" data-state-group="sandwich">
+
+			Ingredients of Mayonnaise:
+			<div data-state="oil" data-state-group="mayonnaise">Oil</div>
+			<div data-state="yolk" data-state-group="mayonnaise">Yolk</div>
+			<div data-state="lemon" data-state-group="mayonnaise">Lemon</div>
+
+			<nav>
+				<span data-state-transition-previous="mayonnaise">&lt;</span>
+				<span data-state-transition="oil" data-state-group="mayonnaise">1</span>
+				<span data-state-transition="yolk" data-state-group="mayonnaise">2</span>
+				<span data-state-transition="lemon" data-state-group="mayonnaise">3</span>
+				<span data-state-transition-next="mayonnaise">&gt;</span>
+			</nav>
+
+		</div>
+		<div data-state="bottom_bread" data-state-group="sandwich"> Bottom Slice of Bread </div>
+
+		<nav>
+			<span data-state-transition-previous="sandwich">&lt;</span>
+			<span data-state-transition="top_bread" data-state-group="sandwich">1</span>
+			<span data-state-transition="lettuce" data-state-group="sandwich">2</span>
+			<span data-state-transition="meat" data-state-group="sandwich">3</span>
+			<span data-state-transition="mayonnaise" data-state-group="sandwich">4</span>
+			<span data-state-transition="bottom_bread" data-state-group="sandwich">5</span>
+			<span data-state-transition-next="sandwich">&gt;</span>
+		</nav>
+
+	</body>
+</html>
