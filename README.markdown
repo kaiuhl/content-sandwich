@@ -19,14 +19,14 @@ application.
     <div data-state-group="sandwiches" data-state="bread">
       <h1>Bread</h1>
       <p>First, use Dave's Killer Bread.</p>
-      <button data-state-transition="condiments">Next</button>
+      <button data-state-group="sandwiches" data-state-transition="condiments">Next</button>
     </div>
 
     <div data-state-group="sandwiches" data-state="condiments">
       <h1>Condiments</h1>
       <p>Next, cover the bread with a thin layer of Kewpie Mayo and add
       romaine lettuce and in-season tomato slices.</p>
-      <button data-state-transition="meat">Next</button>
+      <button data-state-group="sandwiches" data-state-transition="meat">Next</button>
     </div>
 
     <div data-state-group="sandwiches" data-state="meat">
